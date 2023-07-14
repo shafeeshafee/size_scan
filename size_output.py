@@ -70,17 +70,12 @@ else:
 
 folder_path = os.path.abspath(folder_path)
 
+output_directory = get_output_directory_path()
+
 output_file_path = get_output_file_path()
 
 generate_output(folder_path, output_file_path)
 
 os.system(f'notepad.exe {output_file_path}')
 
-save_file = input("Do you want to save the file? (y/n): ")
-
-if save_file.lower() == "y":
-    save_path = input("Enter the file path to save the JSON file: ")
-    save_path = os.path.abspath(save_path)
-    shutil.copy2(output_file_path, save_path)
-
-os.remove(output_file_path)
+shutil.move(output_file_path, output_directory)
