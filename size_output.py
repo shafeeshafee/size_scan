@@ -18,21 +18,22 @@ def get_entry_sizes(entry):
 
 
 def format_size(size):
+    unit = "MB"
     if size >= 1024 * 1024 * 1024:
-        size = size / (1024 * 1024 * 1024)
+        size /= (1024 * 1024 * 1024)
         unit = "GB"
     else:
-        size = size / (1024 * 1024)
-        unit = "MB"
+        size /= (1024 * 1024)
     return f"{size:.2f} {unit}"
 
 
 def get_entry_info(entry):
     entry_size = get_entry_sizes(entry)
-    if entry.is_file():
-        return {"path": entry.path, "size": format_size(entry_size), "type": "File"}
-    elif entry.is_dir():
-        return {"path": entry.path, "size": format_size(entry_size), "type": "Directory"}
+    return {
+        "path": entry.path,
+        "size": format_size(entry_size),
+        "type": "File" if entry.is_file() else "Directory"
+    }
 
 
 def convert_size_to_bytes(size):
@@ -42,10 +43,7 @@ def convert_size_to_bytes(size):
 
 
 def generate_output(folder_path, output_path):
-    entries = []
-    for entry in os.scandir(folder_path):
-        entries.append(get_entry_info(entry))
-
+    entries = [get_entry_info(entry) for entry in os.scandir(folder_path)]
     sorted_entries = sorted(
         entries, key=lambda x: convert_size_to_bytes(x["size"]), reverse=True)
 
@@ -55,9 +53,7 @@ def generate_output(folder_path, output_path):
 
 def get_output_directory_path():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_directory = os.path.join(script_dir, "output")
-    os.makedirs(output_directory, exist_ok=True)
-    return output_directory
+    return os.path.join(script_dir, "output")
 
 
 def get_unique_filename():
@@ -67,8 +63,7 @@ def get_unique_filename():
     return f"output-{random_string}-{current_time}.json"
 
 
-def get_output_file_path():
-    output_directory = get_output_directory_path()
+def get_output_file_path(output_directory):
     filename = get_unique_filename()
     return os.path.join(output_directory, filename)
 
@@ -79,10 +74,8 @@ else:
     folder_path = input("Enter the folder path: ")
 
 folder_path = os.path.abspath(folder_path)
-
 output_directory = get_output_directory_path()
-
-output_file_path = get_output_file_path()
+output_file_path = get_output_file_path(output_directory)
 
 generate_output(folder_path, output_file_path)
 
