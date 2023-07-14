@@ -1,6 +1,8 @@
 import os
 import sys
 import json
+from datetime import datetime
+import shutil
 
 
 def get_entry_sizes(entry):
@@ -49,6 +51,18 @@ def generate_output(folder_path, output_path):
         json.dump(sorted_entries, output_file, indent=4)
 
 
+def get_output_directory_path():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_directory = os.path.join(script_dir, "output")
+    os.makedirs(output_directory, exist_ok=True)
+    return output_directory
+
+
+def get_output_file_path():
+    current_time = datetime.now().strftime("%I%M%S%p-%b%d%Y")
+    return os.path.join(get_output_directory_path(), f"output-{current_time}.json")
+
+
 if len(sys.argv) > 1:
     folder_path = sys.argv[1]
 else:
@@ -56,10 +70,17 @@ else:
 
 folder_path = os.path.abspath(folder_path)
 
-output_path = 'output.json'
+output_file_path = get_output_file_path()
 
-generate_output(folder_path, output_path)
+generate_output(folder_path, output_file_path)
 
-os.system(f'notepad.exe {output_path}')
+os.system(f'notepad.exe {output_file_path}')
 
-os.remove(output_path)
+save_file = input("Do you want to save the file? (y/n): ")
+
+if save_file.lower() == "y":
+    save_path = input("Enter the file path to save the JSON file: ")
+    save_path = os.path.abspath(save_path)
+    shutil.copy2(output_file_path, save_path)
+
+os.remove(output_file_path)
