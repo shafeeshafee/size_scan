@@ -29,17 +29,16 @@ generate_output() {
     local folder_path="$1"
     local entries=()
     while IFS= read -r -d '' entry; do
-        entries+=("$entry")
-    done < <(find "$folder_path" -mindepth 1 -print0)
-    local sorted_entries=()
-    while IFS= read -r entry; do
-        sorted_entries+=("$entry")
-    done < <(printf '%s\n' "${entries[@]}" | sort -z -k2nr)
-    for entry in "${sorted_entries[@]}"; do
         local size=$(get_entry_sizes "$entry")
+        entries+=("$size $entry")
+    done < <(find "$folder_path" -mindepth 1 -print0)
+    IFS=$'\n' sorted_entries=($(printf '%s\n' "${entries[@]}" | sort -rn))
+    for entry in "${sorted_entries[@]}"; do
+        local size=$(cut -d " " -f 1 <<< "$entry")
+        local file=$(cut -d " " -f 2- <<< "$entry")
         local formatted_size=$(format_size "$size")
-        echo "$(basename "$entry") - $formatted_size"
-    done | sort -k3 -Vr
+        echo "$(basename "$file") - $formatted_size"
+    done
 }
 
 folder_path="${1:-}"
