@@ -3,6 +3,8 @@ import sys
 import json
 from datetime import datetime
 import shutil
+import random
+import string
 
 
 def get_entry_sizes(entry):
@@ -58,9 +60,17 @@ def get_output_directory_path():
     return output_directory
 
 
-def get_output_file_path():
+def get_unique_filename():
+    random_string = ''.join(random.choices(
+        string.ascii_letters + string.digits, k=8))
     current_time = datetime.now().strftime("%I%M%S%p-%b%d%Y")
-    return os.path.join(get_output_directory_path(), f"output-{current_time}.json")
+    return f"output-{random_string}-{current_time}.json"
+
+
+def get_output_file_path():
+    output_directory = get_output_directory_path()
+    filename = get_unique_filename()
+    return os.path.join(output_directory, filename)
 
 
 if len(sys.argv) > 1:
@@ -78,4 +88,5 @@ generate_output(folder_path, output_file_path)
 
 os.system(f'notepad.exe {output_file_path}')
 
-shutil.move(output_file_path, output_directory)
+file_name = os.path.basename(output_file_path)
+print(f"Successfully generated and saved. Results stored in: '{file_name}'")
